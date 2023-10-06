@@ -66,5 +66,5 @@ Using `Scrapy`` for web scraping involves several steps. Here's a simplified gui
 ### Create Embeddings
 
 ```bash
-$ cargo run --bin indexer -- --path "/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt"
+$ cargo run --bin embed -- --path "/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt"
 ```

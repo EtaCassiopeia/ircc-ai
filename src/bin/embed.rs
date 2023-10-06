@@ -21,7 +21,11 @@ async fn main() -> Result<()> {
 	let args = Args::parse();
 
 	let dir = PathBuf::from(args.path);
-	list_files_recursively(dir).await?;
+	let file = list_files_recursively(dir).await?;
+
+	for f in file {
+		println!("{}", f.display());
+	}
 
 	Ok(())
 }
