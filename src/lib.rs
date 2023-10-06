@@ -1,3 +1,4 @@
+mod constants;
 pub mod db;
 pub mod embeddings;
 pub mod fs;
