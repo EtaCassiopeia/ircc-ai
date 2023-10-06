@@ -1,10 +1,20 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use async_recursion::async_recursion;
 use log::{debug, info};
-use tokio::fs;
+use tokio::{fs, task};
 
-use crate::prelude::Result;
+use crate::{
+	embeddings::{Embeddings, EmbeddingsModel},
+	prelude::*
+};
+
+#[derive(Debug, Clone)]
+pub struct FileEmbeddings {
+	pub path: String,
+	pub embeddings: Embeddings
+}
 
 pub async fn list_files_recursively(dir: PathBuf) -> Result<Vec<PathBuf>> {
 	#[async_recursion(?Send)]
@@ -26,4 +36,29 @@ pub async fn list_files_recursively(dir: PathBuf) -> Result<Vec<PathBuf>> {
 	let mut files = Vec::new();
 	helper(dir, &mut files).await?;
 	Ok(files)
+}
+
+pub async fn embed_path<M: EmbeddingsModel + Send + Sync + 'static>(model: Arc<M>, path: PathBuf) -> Result<Vec<FileEmbeddings>> {
+	let files = list_files_recursively(path).await?;
+
+	let embedding_futures: Vec<_> = files
+		.into_iter()
+		.map(|path| {
+			let model_clone = Arc::clone(&model);
+			task::spawn(async move {
+				let file_content = fs::read_to_string(path.clone()).await.unwrap();
+				let embeddings = model_clone.embed(&file_content).unwrap();
+				FileEmbeddings {
+					path: path.to_str().unwrap().to_string(),
+					embeddings
+				}
+			})
+		})
+		.collect();
+
+	let file_embeddings: Vec<_> = futures::future::join_all(embedding_futures).await.into_iter()
+        .map(|res| res.unwrap())  // unwrap the Result returned by task::spawn
+        .collect();
+
+	Ok(file_embeddings)
 }
