@@ -1,4 +1,4 @@
-mod onnx;
+pub mod onnx;
 
 use ndarray::ArrayView1;
 pub use onnx::*;

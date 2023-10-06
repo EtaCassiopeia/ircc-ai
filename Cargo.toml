@@ -28,5 +28,6 @@ ort = {version = "1", features = ["load-dynamic"]}
 tokio = {version = "1",  features = ["full"] }
 tokenizers = "0.14"
 futures = "0.3.28"
+async-trait = "0.1"
 
 
