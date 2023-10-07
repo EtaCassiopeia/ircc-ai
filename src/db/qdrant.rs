@@ -11,7 +11,7 @@ use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIter
 
 use super::RepositoryEmbeddingsDB;
 use crate::{
-	constants::{EMBEDDINGS_DIMENSION, MAX_FILES_COUNT, QDRANT_COLLECTION_NAME},
+	constants::{EMBEDDINGS_DIMENSION, MAX_FILES_COUNT, QDRANT_COLLECTION_NAME, QDRANT_URL_DEFAULT},
 	embeddings::Embeddings,
 	fs::FileEmbeddings,
 	prelude::*
@@ -105,4 +105,20 @@ impl RepositoryEmbeddingsDB for QdrantDB {
 	async fn is_indexed(&self) -> Result<bool> {
 		self.client.has_collection(QDRANT_COLLECTION_NAME).await
 	}
+}
+
+impl QdrantDB {
+    pub fn initialize() -> Result<QdrantDB> {
+        let mut qdrant_url =
+            std::env::var("QDRANT_URL").unwrap_or(String::from(QDRANT_URL_DEFAULT));
+        dbg!(&qdrant_url);
+
+        if qdrant_url.is_empty() {
+            qdrant_url = QDRANT_URL_DEFAULT.to_string();
+        }
+
+        let config = QdrantClientConfig::from_url(&qdrant_url);
+        let client = QdrantClient::new(Some(config))?;
+        Ok(QdrantDB { client })
+    }
 }

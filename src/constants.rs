@@ -1,3 +1,6 @@
+// Env var defaults
+pub const QDRANT_URL_DEFAULT: &str = "http://localhost:6334";
+
 // Embeddings
 pub const EMBEDDINGS_DIMENSION: usize = 384;
 
