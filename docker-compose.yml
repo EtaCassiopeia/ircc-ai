@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+
+  embed:
+    image: ircc-ai-embed:latest
+    # `embed` will not start automatically. To start `embed`, you would run `docker-compose --profile manual up embed`
+    profiles:
+      - manual    
+    command: ["--path", "/content"]
+    environment:
+      # Consume env variables from a .env file found in the same directory
+      # as this docker-compose file.
+      QDRANT_URL: "http://qdrant:6334"
+      RUST_LOG: "info"    
+    volumes:
+      - ${CONTENT_PATH_HOST:-./content}:/content
+    depends_on:
+      - qdrant

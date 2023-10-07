@@ -63,8 +63,34 @@ Using `Scrapy`` for web scraping involves several steps. Here's a simplified gui
      scrapy crawl canada_ca_txt
      ```
 
-### Create Embeddings
+## Running Locally
+
+To run the project locally, there are a few prerequisites:
+
+- The [Rust toolchain](https://www.rust-lang.org/learn/get-started)
+- The [Onnx Runtime](https://onnxruntime.ai/docs/install/). Will be downloaded and installed automatically when building the project.
+- [Docker](https://docs.docker.com/engine/install/) to run the [QdrantDB](https://qdrant.tech/) instance.
+- `make` for easy automation and development workflow
+
+Once, the above requirements are satisfied, you can run the project like so:    
+
+### Docker container
+
+The `ircc-ai` engine and embed can also be run locally via a docker container and
+includes all the necessary dependencies.
+
+To build the docker images run:
 
 ```bash
-$ cargo run --bin embed -- --path "/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt"
+$ make local-image
 ```
+
+### Create Embeddings
+
+To create the embeddings, run the following command.  It will traverse the directory specified by `CONTENT_PATH_HOST`, creating embeddings for each file. These embeddings will then be stored in `QdrantDB`.
+
+```bash
+$ make start-embed CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt
+```
+
+The database dashboard will be accessible at [localhost:6333/dashboard](http://localhost:6333/dashboard), the project communicates with the DB on port `6334`.
