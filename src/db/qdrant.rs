@@ -23,7 +23,7 @@ pub struct QdrantDB {
 
 #[async_trait]
 impl RepositoryEmbeddingsDB for QdrantDB {
-	async fn inserts_embeddings(&self, embeddings: Vec<FileEmbeddings>) -> Result<()> {
+	async fn insert_embeddings(&self, embeddings: Vec<FileEmbeddings>) -> Result<()> {
 		if self.client.has_collection(QDRANT_COLLECTION_NAME).await? {
 			self.client.delete_collection(QDRANT_COLLECTION_NAME).await?;
 		}
@@ -108,17 +108,16 @@ impl RepositoryEmbeddingsDB for QdrantDB {
 }
 
 impl QdrantDB {
-    pub fn initialize() -> Result<QdrantDB> {
-        let mut qdrant_url =
-            std::env::var("QDRANT_URL").unwrap_or(String::from(QDRANT_URL_DEFAULT));
-        dbg!(&qdrant_url);
+	pub fn initialize() -> Result<QdrantDB> {
+		let mut qdrant_url = std::env::var("QDRANT_URL").unwrap_or(String::from(QDRANT_URL_DEFAULT));
+		dbg!(&qdrant_url);
 
-        if qdrant_url.is_empty() {
-            qdrant_url = QDRANT_URL_DEFAULT.to_string();
-        }
+		if qdrant_url.is_empty() {
+			qdrant_url = QDRANT_URL_DEFAULT.to_string();
+		}
 
-        let config = QdrantClientConfig::from_url(&qdrant_url);
-        let client = QdrantClient::new(Some(config))?;
-        Ok(QdrantDB { client })
-    }
+		let config = QdrantClientConfig::from_url(&qdrant_url);
+		let client = QdrantClient::new(Some(config))?;
+		Ok(QdrantDB { client })
+	}
 }
