@@ -3,6 +3,8 @@ use std::sync::Arc;
 
 use async_recursion::async_recursion;
 use log::{debug, info};
+use tokio::fs::File;
+use tokio::io::AsyncReadExt;
 use tokio::{fs, task};
 
 use crate::{
@@ -61,4 +63,12 @@ pub async fn embed_path<M: EmbeddingsModel + Send + Sync + 'static>(model: Arc<M
         .collect();
 
 	Ok(file_embeddings)
+}
+
+pub async fn fetch_file_content(path: &str) -> Result<String> {
+	let mut file = File::open(path).await?;
+
+	let mut buffer = String::new();
+	file.read_to_string(&mut buffer).await?;
+	Ok(buffer)
 }
