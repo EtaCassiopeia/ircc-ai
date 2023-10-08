@@ -1,9 +1,11 @@
+#![allow(unused_must_use)]
 pub mod data;
 mod prompts;
 
 use std::env;
 use std::sync::Arc;
 
+use actix_web_lab::sse::Sender;
 use openai_api_rs::v1::chat_completion::FinishReason;
 use openai_api_rs::v1::{
 	api::Client,
@@ -15,6 +17,7 @@ use self::prompts::{answer_generation_prompt, sanitize_query_prompt};
 use crate::constants::RELEVANT_CHUNKS_LIMIT;
 pub use crate::convrsation::data::*;
 use crate::prelude::*;
+use crate::routes::events::{emit, QueryEvent};
 use crate::utils::functions::{paths_to_completion_message, relevant_chunks_to_completion_message, search_documents, search_file, search_path, Function};
 use crate::{db::RepositoryEmbeddingsDB, embeddings::EmbeddingsModel};
 
@@ -23,11 +26,14 @@ pub struct Conversation<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> {
 	client: Client,
 	messages: Vec<ChatCompletionMessage>,
 	db: Arc<D>,
-	model: Arc<M>
+	model: Arc<M>,
+	sender: Sender
 }
 
 impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
-	pub async fn initiate(mut query: data::Query, db: Arc<D>, model: Arc<M>) -> Result<Self> {
+	pub async fn initiate(mut query: data::Query, db: Arc<D>, model: Arc<M>, sender: Sender) -> Result<Self> {
+		emit(&sender, QueryEvent::ProcessQuery(None)).await;
+
 		query.query = sanitize_query(&query.query)?;
 		let client = Client::new(env::var("OPENAI_API_KEY").unwrap());
 		let messages = vec![
@@ -44,7 +50,14 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 				content: query.to_string()
 			},
 		];
-		Ok(Self { query, client, messages, db, model })
+		Ok(Self {
+			query,
+			client,
+			messages,
+			db,
+			model,
+			sender
+		})
 	}
 
 	fn append_message(&mut self, message: ChatCompletionMessage) {
@@ -89,6 +102,8 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 									Function::SearchDocuments => {
 										let query: &str = parsed_function_call.args["query"].as_str().unwrap_or_default();
 
+										emit(&self.sender, QueryEvent::SearchCodebase(Some(parsed_function_call.clone().args))).await;
+
 										let relevant_chunks = search_documents(
 											query,
 											self.model.as_ref(),
@@ -104,12 +119,16 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 										let query: &str = parsed_function_call.args["query"].as_str().unwrap_or_default();
 										let path: &str = parsed_function_call.args["path"].as_str().unwrap_or_default();
 
+										emit(&self.sender, QueryEvent::SearchFile(Some(parsed_function_call.clone().args))).await;
+
 										let relevant_chunks = search_file(path, query, self.model.as_ref(), RELEVANT_CHUNKS_LIMIT).await?;
 										let completion_message = relevant_chunks_to_completion_message(parsed_function_call.name, relevant_chunks);
 										self.append_message(completion_message);
 									}
 									Function::SearchPath => {
 										let path: &str = parsed_function_call.args["path"].as_str().unwrap_or_default();
+
+										emit(&self.sender, QueryEvent::SearchPath(Some(parsed_function_call.clone().args))).await;
 
 										let fuzzy_matched_paths = search_path(path, self.db.as_ref(), 1).await?;
 										let completion_message = paths_to_completion_message(parsed_function_call.name, fuzzy_matched_paths);
@@ -121,14 +140,18 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 										// Generate a request with the message history and no functions
 										let request = generate_completion_request(self.messages.clone(), "none");
 
-										let _response = match self.send_request(request) {
+										emit(&self.sender, QueryEvent::GenerateResponse(None)).await;
+
+										let response = match self.send_request(request) {
 											Ok(response) => response,
 											Err(e) => {
 												dbg!(e.to_string());
 												return Err(e);
 											}
 										};
-										// let response = response.choices[0].message.content.clone().unwrap_or_default();
+										let response = response.choices[0].message.content.clone().unwrap_or_default();
+
+										emit(&self.sender, QueryEvent::Done(Some(response.into()))).await;
 
 										return Ok(());
 									}
@@ -147,6 +170,8 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 							// preview, you can take full advantage of this powerful feature."
 
 							let response = response.choices[0].message.content.clone().unwrap_or_default();
+							emit(&self.sender, QueryEvent::Done(Some(response.into()))).await;
+
 							return Ok(());
 						}
 

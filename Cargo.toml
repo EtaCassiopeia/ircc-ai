@@ -8,13 +8,17 @@ repository = "https://github.com/EtaCassiopeia/ircc-ai"
 authors = ["Mohsen Zainalpour <zainalpour@yahoo.com>"]
 license = "MIT"
 
-default-run = "embed"
+default-run = "oracle"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
 name = "embed"
 path = "src/bin/embed.rs"
+
+[[bin]]
+name = "oracle"
+path = "src/bin/oracle.rs"
 
 [dependencies]
 anyhow = "1"
@@ -36,3 +40,8 @@ serde = "1"
 serde_json = "1"
 text-splitter = "0.4"
 rust-fuzzy-search = "0.1"
+actix-web = "4"
+actix-web-lab = "0.19"
+actix-rt = "2"
+tracing-actix-web = "0.7"
+actix-cors = "0.6.4"

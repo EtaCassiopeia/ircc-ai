@@ -2,11 +2,16 @@ use std::ops::RangeInclusive;
 
 // Env var defaults
 pub const QDRANT_URL_DEFAULT: &str = "http://localhost:6334";
+pub const WEBSERVER_PORT_DEFAULT: &str = "3000";
 
 // Embeddings
 pub const EMBEDDINGS_DIMENSION: usize = 384;
 
 pub const QDRANT_COLLECTION_NAME: &str = "IRCC";
+
+// Actix-web
+pub const HOME_ROUTE_REDIRECT_URL: &str = "https://ircc.ai";
+pub const SSE_CHANNEL_BUFFER_SIZE: usize = 1;
 
 // Semantic search
 pub const MAX_FILES_COUNT: usize = 1000;
