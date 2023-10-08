@@ -2,7 +2,15 @@
 
 ## Description:
 
-The Generative AI-Assisted Interactive Resource Center is an ambitious project aimed at revolutionizing the Immigration, Refugees, and Citizenship Canada (IRCC)’s user engagement experience. At the core of this project is a Generative AI framework that facilitates a dynamic chat environment, enabling users to pose queries and receive precise, informative responses sourced from IRCC's extensive documentation.
+The Generative AI-Assisted Interactive Resource Center is an ambitious project aimed at revolutionizing the Immigration, Refugees, and Citizenship Canada (IRCC)’s user engagement experience using RAG. At the core of this project is a Generative AI framework that facilitates a dynamic chat environment, enabling users to pose queries and receive precise, informative responses sourced from IRCC's extensive documentation.
+
+## Retrieval Augmented Generation (RAG)
+The idea behind RAG applications is to provide LLMs with additional context at query time for answering the user’s question.
+
+1. When a user asks the support agent a question, the question first goes through an embedding model to calculate its vector representation.
+2. The next step is to find the most relevant nodes in the database by comparing the cosine similarity of the embedding values of the user’s question and the documents in the database.
+3.Once the relevant nodes are identified using vector search, the application is designed to retrieve additional information from the nodes themselves and also by traversing the relationships in the graph.
+4. Finally, the context information from the database is combined with the user question and additional instructions into a prompt that is passed to an LLM to generate the final answer, which is then sent to the user.
 
 ## Key Features:
 
