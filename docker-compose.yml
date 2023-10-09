@@ -7,6 +7,23 @@ services:
       - "6333:6333"
       - "6334:6334"
 
+  oracle:
+    image: ircc-ai-oracle:latest
+    command: ["--path", "/content"]
+    environment:
+      # Consume env variables from a .env file found in the same directory
+      # as this docker-compose file.
+      QDRANT_URL: "http://qdrant:6334"
+      WEBSERVER_PORT: 3000
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      RUST_LOG: "info" 
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${CONTENT_PATH_HOST:-./content}:/content
+    depends_on:
+      - qdrant
+
   embed:
     image: ircc-ai-embed:latest
     # `embed` will not start automatically. To start `embed`, you would run `docker-compose --profile manual up embed`

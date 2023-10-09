@@ -1,4 +1,4 @@
-.PHONY: fetch lint build local-image-embed start-embed
+.PHONY: fetch lint build local-image-embed start-embed local-image-oracle start-oracle
 
 # Fetches new dependencies from cargo registries
 fetch:
@@ -16,9 +16,15 @@ build:
 	cargo build --locked --release --all
 
 local-image-embed:
-	docker buildx build -f Dockerfile.embed --load -t ircc-ai-embed .
+	docker buildx build -f embed.Dockerfile --load -t ircc-ai-embed .
 
-local-image: local-image-embed
+local-image-oracle:
+	docker buildx build -f oracle.Dockerfile --load -t ircc-ai-oracle .
+
+local-image: local-image-embed local-image-oracle
 
 start-embed:
 	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml --profile manual up embed --build
+
+start-oracle:
+	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml up oracle --build

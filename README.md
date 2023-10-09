@@ -101,4 +101,48 @@ To create the embeddings, run the following command.  It will traverse the direc
 $ make start-embed CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt
 ```
 
+### Start the Engine
+To start the engine, run the following command.  It will start the engine and expose it on port `3000`.
+
+```bash
+$ make start-oracle CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt
+``````
+
+
 The database dashboard will be accessible at [localhost:6333/dashboard](http://localhost:6333/dashboard), the project communicates with the DB on port `6334`.
+
+
+## Service Endpoints
+
+> **Note:**
+> Since the service returns responses as SSEs, a REST client like Postman is recommended. Download it [here](https://www.postman.com/downloads/). The Postman web client does not support requests to `localhost`.
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/18073744-276b793e-f5ec-418f-ba0a-9dff94af543e?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D18073744-276b793e-f5ec-418f-ba0a-9dff94af543e%26entityType%3Dcollection%26workspaceId%3D8d8a1363-ad0a-45ad-b036-ef6a37e44ef8)
+
+| Endpoint             | Method | Description                                   |
+|----------------------|--------|-----------------------------------------------|
+| `/`                  | GET    | Redirects to the configured [redirect URL](https://github.com/EtaCassiopeia/ircc-ai).          |
+| `/query`             | POST   | Perform a query on the API with a specific question. |
+
+
+### 1. `/query`
+
+#### Parameters
+
+The parameters are passed as a JSON object in the request body:
+
+- `query` (string, required): The question or query you want to ask.
+
+#### Response
+
+The request is processed by the server and responses are sent as [Server-sent events(SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events). The event stream will contain [events](https://github.com/EtaCassiopeia/ircc-ai/blob/af60f851b9fc9362ba43c01f88b6f5e6770b1f2a/src/routes/events.rs#L14) with optional data.
+
+#### Example
+
+```bash
+curl --location 'localhost:3000/query' \
+--header 'Content-Type: application/json' \
+--data '{
+    "query": "Which documents do I need to submit for a permanent residence application?"
+}'
+```
