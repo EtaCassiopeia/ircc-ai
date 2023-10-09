@@ -39,7 +39,7 @@ Using `Scrapy`` for web scraping involves several steps. Here's a simplified gui
 
 ### 1. **Installation**:
    - You'll need to have Python installed on your machine.
-   - Install Scrapy using pip: 
+   - Install Scrapy using pip:
      ```bash
      $ pip install scrapy
      $ pip install html2text
@@ -80,7 +80,7 @@ To run the project locally, there are a few prerequisites:
 - [Docker](https://docs.docker.com/engine/install/) to run the [QdrantDB](https://qdrant.tech/) instance.
 - `make` for easy automation and development workflow
 
-Once, the above requirements are satisfied, you can run the project like so:    
+Once, the above requirements are satisfied, you can run the project like so:
 
 ### Docker container
 
@@ -143,6 +143,6 @@ The request is processed by the server and responses are sent as [Server-sent ev
 curl --location 'localhost:3000/query' \
 --header 'Content-Type: application/json' \
 --data '{
-    "query": "Which documents do I need to submit for a permanent residence application?"
+    "query": "How long must I stay in Canada to keep my permanent resident status?"
 }'
 ```

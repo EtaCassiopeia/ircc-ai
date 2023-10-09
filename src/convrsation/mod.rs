@@ -32,6 +32,7 @@ pub struct Conversation<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> {
 
 impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 	pub async fn initiate(mut query: data::Query, db: Arc<D>, model: Arc<M>, sender: Sender) -> Result<Self> {
+		dbg!("Initiating conversation with query: {}", &query.query);
 		emit(&sender, QueryEvent::ProcessQuery(None)).await;
 
 		query.query = sanitize_query(&query.query)?;
@@ -50,6 +51,7 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 				content: query.to_string()
 			},
 		];
+		dbg!("Initiated conversation with sanitized query: {}\n\n Messages: {}", &query.query, &messages);
 		Ok(Self {
 			query,
 			client,
@@ -75,6 +77,7 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 	}
 
 	fn send_request(&self, request: ChatCompletionRequest) -> Result<ChatCompletionResponse> {
+		dbg!("Sending request to OpenAI API: \n{}", &request);
 		Ok(self.client.chat_completion(request)?)
 	}
 
@@ -86,8 +89,10 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 
 			match self.send_request(request) {
 				Ok(response) => {
+					dbg!("Response: {}", &response);
 					match response.choices[0].finish_reason {
 						FinishReason::function_call => {
+							dbg!("Finish reason: Function call");
 							if let Some(function_call) = response.choices[0].message.function_call.clone() {
 								let parsed_function_call = ParsedFunctionCall::try_from(&function_call)?;
 								let function_call_message = ChatCompletionMessage {
@@ -101,8 +106,9 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 								match parsed_function_call.name {
 									Function::SearchDocuments => {
 										let query: &str = parsed_function_call.args["query"].as_str().unwrap_or_default();
+										dbg!("SearchDocuments with params: {}", query);
 
-										emit(&self.sender, QueryEvent::SearchCodebase(Some(parsed_function_call.clone().args))).await;
+										emit(&self.sender, QueryEvent::SearchDocuments(Some(parsed_function_call.clone().args))).await;
 
 										let relevant_chunks = search_documents(
 											query,
@@ -113,28 +119,35 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 										)
 										.await?;
 										let completion_message = relevant_chunks_to_completion_message(parsed_function_call.name, relevant_chunks);
+										dbg!("Completion message: {}", &completion_message);
 										self.append_message(completion_message);
 									}
 									Function::SearchFile => {
 										let query: &str = parsed_function_call.args["query"].as_str().unwrap_or_default();
 										let path: &str = parsed_function_call.args["path"].as_str().unwrap_or_default();
 
+										dbg!("SearchFile at {} with params: {}", path, query);
+
 										emit(&self.sender, QueryEvent::SearchFile(Some(parsed_function_call.clone().args))).await;
 
 										let relevant_chunks = search_file(path, query, self.model.as_ref(), RELEVANT_CHUNKS_LIMIT).await?;
 										let completion_message = relevant_chunks_to_completion_message(parsed_function_call.name, relevant_chunks);
+										dbg!("Completion message: {}", &completion_message);
 										self.append_message(completion_message);
 									}
 									Function::SearchPath => {
 										let path: &str = parsed_function_call.args["path"].as_str().unwrap_or_default();
+										dbg!("SearchPath with params: {}", path);
 
 										emit(&self.sender, QueryEvent::SearchPath(Some(parsed_function_call.clone().args))).await;
 
 										let fuzzy_matched_paths = search_path(path, self.db.as_ref(), 1).await?;
 										let completion_message = paths_to_completion_message(parsed_function_call.name, fuzzy_matched_paths);
+										dbg!("Completion message: {}", &completion_message);
 										self.append_message(completion_message);
 									}
 									Function::Done => {
+										dbg!("Generating final response");
 										self.prepare_final_explanation_message();
 
 										// Generate a request with the message history and no functions
@@ -149,6 +162,7 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 												return Err(e);
 											}
 										};
+										dbg!("Response: {}", &response);
 										let response = response.choices[0].message.content.clone().unwrap_or_default();
 
 										emit(&self.sender, QueryEvent::Done(Some(response.into()))).await;
@@ -160,6 +174,7 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 						}
 
 						FinishReason::stop => {
+							dbg!("Finish reason: Stop");
 							// As of yet, there isn't a robust way to instruct the model to respond with function calls only except for switching to
 							// GPT-4 We can only suggest it do so in the system message
 							// prompts.rs#L127
@@ -170,17 +185,20 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 							// preview, you can take full advantage of this powerful feature."
 
 							let response = response.choices[0].message.content.clone().unwrap_or_default();
+							dbg!("Response: {}", &response);
 							emit(&self.sender, QueryEvent::Done(Some(response.into()))).await;
 
 							return Ok(());
 						}
 
 						_ => {
+							dbg!("Model returned an unexpected response.");
 							return Err(anyhow::anyhow!("Model returned an unexpected response."));
 						}
 					}
 				}
 				Err(e) => {
+					dbg!("Error: {}", e.to_string());
 					return Err(e);
 				}
 			};

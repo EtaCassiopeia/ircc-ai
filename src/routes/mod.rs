@@ -36,6 +36,7 @@ async fn query(data: Json<Query>, db: web::Data<Arc<QdrantDB>>, model: web::Data
 
 		Ok(rx)
 	} else {
+		eprintln!("Repository is not indexed");
 		Err(ErrorNotFound("Repository is not indexed"))
 	}
 }

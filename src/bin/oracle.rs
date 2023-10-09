@@ -13,7 +13,10 @@ use tracing_actix_web::TracingLogger;
 #[cfg(feature = "oracle")]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+	use log::info;
+
 	dotenv::dotenv().ok();
+	let host = "0.0.0.0";
 
 	env_logger::init_from_env(Env::default().default_filter_or("info"));
 
@@ -26,7 +29,7 @@ async fn main() -> std::io::Result<()> {
 	}
 	let port = port.parse::<u16>().expect("Invalid WEBSERVER_PORT");
 
-	HttpServer::new(move || {
+	let server = HttpServer::new(move || {
 		App::new()
 			.wrap(Cors::permissive())
 			.wrap(TracingLogger::default())
@@ -35,7 +38,9 @@ async fn main() -> std::io::Result<()> {
 			.app_data(web::Data::new(model.clone()))
 			.app_data(web::Data::new(db.clone()))
 	})
-	.bind(("0.0.0.0", port))?
-	.run()
-	.await
+	.bind((host, port))?;
+
+	info!("Server running on {}:{}", host, port);
+
+	server.run().await
 }

@@ -14,7 +14,7 @@ pub async fn emit<T: Into<Data>>(sender: &Sender, event: T) -> Result<(), SendEr
 sse_events! {
 	QueryEvent,
 	(ProcessQuery, "PROCESS_QUERY"),
-	(SearchCodebase, "SEARCH_CODEBASE"),
+	(SearchDocuments, "SEARCH_DOCUMENTS"),
 	(SearchFile, "SEARCH_FILE"),
 	(SearchPath, "SEARCH_PATH"),
 	(GenerateResponse, "GENERATE_RESPONSE"),
