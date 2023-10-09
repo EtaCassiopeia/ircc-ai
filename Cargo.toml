@@ -13,6 +13,7 @@ default-run = "oracle"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
+default = ["oracle"]
 oracle = ["actix-web","actix-web-lab","actix-rt","tracing-actix-web","actix-cors","openai-api-rs"]
 
 [[bin]]

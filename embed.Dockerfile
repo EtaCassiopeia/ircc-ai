@@ -6,7 +6,7 @@ FROM --platform=$TARGETPLATFORM rust:1.71-slim-bullseye AS builder
 ARG TARGETPLATFORM
 
 # Install g++ and other build essentials for compiling openssl/tls dependencies
-RUN apt update 
+RUN apt update
 RUN apt install -y build-essential
 
 # Install openssl / native tls dependencies
@@ -16,12 +16,12 @@ RUN apt-get install -y \
   libssl-dev
 
 # Clean up apt artifacts
-RUN rm -rf /var/lib/apt/lists/*  
+RUN rm -rf /var/lib/apt/lists/*
 
 # Build the embed binary
 WORKDIR /ircc-ai-build
 COPY . .
-RUN cargo build --release --bin embed
+RUN cargo build --release --bin embed --no-default-features
 
 # Runtime Stage
 # Prepare the runtime image

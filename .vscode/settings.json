@@ -1,0 +1,14 @@
+{
+    "rust-analyzer.cargo.features": ["oracle"],
+    "rust-analyzer.checkOnSave.enable": true,
+    "rust-analyzer.checkOnSave.command": "clippy",
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    }
+}
