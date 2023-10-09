@@ -2,16 +2,13 @@ pub mod events;
 
 use std::sync::Arc;
 
-use actix_web::web::Query as ActixQuery;
-use actix_web::HttpResponse;
 use actix_web::{
-	error::{ErrorBadRequest, ErrorForbidden, ErrorNotFound},
+	error::ErrorNotFound,
 	post,
 	web::{self, Json},
 	Responder, Result
 };
 use actix_web_lab::sse;
-use serde_json::json;
 
 use crate::constants::SSE_CHANNEL_BUFFER_SIZE;
 use crate::convrsation::data::Query;

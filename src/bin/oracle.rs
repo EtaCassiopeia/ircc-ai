@@ -10,13 +10,14 @@ use ircc_ai::{
 };
 use tracing_actix_web::TracingLogger;
 
+#[cfg(feature = "oracle")]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 	dotenv::dotenv().ok();
 
 	env_logger::init_from_env(Env::default().default_filter_or("info"));
 
-	let model: Arc<Onnx> = Arc::new(Onnx::new(Path::new("model")).unwrap());
+	let model: Arc<Onnx> = Arc::new(Onnx::new(Path::new("/model")).unwrap());
 	let db: Arc<QdrantDB> = Arc::new(QdrantDB::initialize().unwrap());
 
 	let mut port = std::env::var("WEBSERVER_PORT").unwrap_or(WEBSERVER_PORT_DEFAULT.into());

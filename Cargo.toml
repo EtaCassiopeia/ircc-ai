@@ -12,6 +12,9 @@ default-run = "oracle"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+oracle = ["actix-web","actix-web-lab","actix-rt","tracing-actix-web","actix-cors","openai-api-rs"]
+
 [[bin]]
 name = "embed"
 path = "src/bin/embed.rs"
@@ -19,6 +22,7 @@ path = "src/bin/embed.rs"
 [[bin]]
 name = "oracle"
 path = "src/bin/oracle.rs"
+features = ["oracle"]
 
 [dependencies]
 anyhow = "1"
@@ -35,13 +39,13 @@ futures = "0.3.28"
 async-trait = "0.1"
 qdrant-client = "1"
 rayon = "1"
-openai-api-rs = "1.0"
+openai-api-rs = {version="1.0", optional = true }
 serde = "1"
 serde_json = "1"
 text-splitter = "0.4"
 rust-fuzzy-search = "0.1"
-actix-web = "4"
-actix-web-lab = "0.19"
-actix-rt = "2"
-tracing-actix-web = "0.7"
-actix-cors = "0.6.4"
+actix-web = {version="4", optional = true }
+actix-web-lab = {version="0.19",optional = true }
+actix-rt = {version="2",optional = true }
+tracing-actix-web = {version="0.7",optional = true }
+actix-cors = {version="0.6.4",optional = true }

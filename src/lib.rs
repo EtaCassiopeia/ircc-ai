@@ -1,8 +1,10 @@
 pub mod constants;
+#[cfg(feature = "oracle")]
 pub mod convrsation;
 pub mod db;
 pub mod embeddings;
 pub mod fs;
 pub mod prelude;
+#[cfg(feature = "oracle")]
 pub mod routes;
 pub mod utils;
