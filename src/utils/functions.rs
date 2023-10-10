@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{env, str::FromStr};
 
 use ndarray::ArrayView1;
 use openai_api_rs::v1::chat_completion::{ChatCompletionMessage, MessageRole};
@@ -41,7 +41,18 @@ pub async fn search_documents<M: EmbeddingsModel, D: RepositoryEmbeddingsDB>(
 }
 
 pub async fn search_file<M: EmbeddingsModel>(path: &str, query: &str, model: &M, chunks_limit: usize) -> Result<Vec<RelevantChunk>> {
-	let file_content = fetch_file_content(path).await.unwrap_or_default();
+	// Get DOCUMENTS_BASE_PATH from the environment
+	let base_path = env::var("DOCUMENTS_BASE_PATH").unwrap_or("/content".to_string());
+
+	// Ensure path starts with DOCUMENTS_BASE_PATH
+	let full_path = if path.starts_with(&base_path) {
+		path.to_string()
+	} else {
+		dbg!("Accessing inline document link: {}", path);
+		format!("{}{}", base_path, path)
+	};
+
+	let file_content = fetch_file_content(&full_path).await.unwrap_or_default();
 
 	let splitter = text_splitter::TextSplitter::default().with_trim_chunks(true);
 

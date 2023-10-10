@@ -120,7 +120,7 @@ pub fn functions() -> Vec<F> {
 
 pub fn system_message() -> String {
 	String::from(
-		r#"Your job is to choose a function that will help retrieve all relevant information to answer a user's query about immigration, refugees, and citizenship of Canada from locally stored files in documents folder, which will be referred to as 'documents' henceforth.
+		r#"Your job is to choose a function that will help retrieve all relevant information to answer a user's query about immigration, refugees, and citizenship of Canada from locally stored Markdown files in documents folder, which will be referred to as 'documents' henceforth.
 Follow these rules at all times:
 - Respond with functions until all relevant information has been found.
 - If the output of a function is not relevant or sufficient, try again with different arguments or try using a different function
@@ -137,14 +137,14 @@ Follow these rules at all times:
 
 pub fn answer_generation_prompt() -> String {
 	String::from(
-		r#"Your job is to answer a user query about Canada's immigration, refugee, and citizenship policies using information from locally stored files, which will be referred to as 'documents' henceforth.
+		r#"Your job is to answer a user query about Canada's immigration, refugee, and citizenship policies using information from locally stored Markdown files, which will be referred to as 'documents' henceforth.
 Given is the history of the function calls made by you to retrieve all relevant information from the documents and their responses
 Follow these rules at all times:
 - Use the information from the function calls to generate a response
 - Do NOT assume the existence of files or folders
 - Each function response has path information that you can use to cite the source
-- Each file encapsulates specific information; additionally, it may contain links or references to other files or external resources for complementary information.
- Follow the links where necessary to obtain a more complete understanding and generate a comprehensive reply to the user's query
+- Each file encapsulates specific information; additionally, it may contain relative links or references to other files for complementary information specified as MArkdown links.
+ Follow the links where necessary to obtain a more complete understanding and generate a comprehensive reply to the user's query. The content of the links can be found in the documents folder and can be fetched using the functions.search_file function.
 "#
 	)
 }
