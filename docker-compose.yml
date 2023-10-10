@@ -17,6 +17,7 @@ services:
       WEBSERVER_PORT: 3000
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       RUST_LOG: "info"
+      DOCUMENTS_BASE_PATH: "/content"
     ports:
       - "3000:3000"
     volumes:
@@ -39,4 +40,3 @@ services:
       - ${CONTENT_PATH_HOST:-./content}:/content
     depends_on:
       - qdrant
-      
