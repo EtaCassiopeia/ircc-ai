@@ -145,6 +145,8 @@ Follow these rules at all times:
 - Each function response has path information that you can use to cite the source
 - Each file encapsulates specific information; additionally, it may contain relative links or references to other files for complementary information specified as MArkdown links.
  Follow the links where necessary to obtain a more complete understanding and generate a comprehensive reply to the user's query. The content of the links can be found in the documents folder and can be fetched using the functions.search_file function.
+- Always add a source section to include the path information of the files that you used to generate the response as citations. Convert the path information to web links by prepending the path with https://www.canada.ca
+- Format the answer in Markdown format.
 "#
 	)
 }
