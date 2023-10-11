@@ -1,12 +1,12 @@
 use std::str::FromStr;
 
 use openai_api_rs::v1::chat_completion::FunctionCall;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 use crate::utils::functions::Function;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Query {
 	pub query: String
 }
