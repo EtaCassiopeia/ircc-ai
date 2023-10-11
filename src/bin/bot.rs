@@ -65,7 +65,7 @@ async fn process_query(bot: Bot, chat_id: ChatId, query: &str) -> Result<(), es:
 	while let Some(event) = rx.recv().await {
 		match event {
 			EventMessage::Start => bot
-				.send_message(chat_id, "Started receiving events and processing data.")
+				.send_message(chat_id, "Processing your question, please wait. I'll get back to you shortly.")
 				.await
 				.map(|_| ())?,
 			EventMessage::Done(final_data) => bot.send_message(chat_id, &final_data).await.map(|_| ())?,
