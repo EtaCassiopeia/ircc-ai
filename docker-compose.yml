@@ -40,3 +40,14 @@ services:
       - ${CONTENT_PATH_HOST:-./content}:/content
     depends_on:
       - qdrant
+
+  bot:
+    image: ircc-ai-bot:latest
+    environment:
+      # Consume env variables from a .env file found in the same directory
+      # as this docker-compose file.
+      RUST_LOG: "info"
+      ORACLE_QUERY_URL: "http://oracle:3000/query"
+      TELOXIDE_TOKEN: ${TELOXIDE_TOKEN}
+    depends_on:
+      - oracle
