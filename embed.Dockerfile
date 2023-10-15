@@ -21,7 +21,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # Build the embed binary
 WORKDIR /ircc-ai-build
 COPY . .
-RUN cargo build --release --bin embed --no-default-features
+RUN cargo build --release --bin embed --no-default-features --features embed
 
 # Runtime Stage
 # Prepare the runtime image
