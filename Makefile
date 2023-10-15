@@ -1,8 +1,8 @@
-.PHONY: fetch lint build local-image-embed start-embed local-image-oracle start-oracle
+.PHONY: fetch lint build local-image-embed start-embed local-image-oracle start-oracle local-image-bot start-bot local-image
 
 # Fetches new dependencies from cargo registries
 fetch:
-	cargo fetch --locked 
+	cargo fetch --locked
 
 # Lints rust code via fmt and clippy
 lint:
@@ -16,15 +16,26 @@ build:
 	cargo build --locked --release --all
 
 local-image-embed:
+	cargo clean
 	docker buildx build -f embed.Dockerfile --load -t ircc-ai-embed .
 
 local-image-oracle:
+	cargo clean
 	docker buildx build -f oracle.Dockerfile --load -t ircc-ai-oracle .
 
-local-image: local-image-embed local-image-oracle
+local-image-bot:
+# Clean up the build catch to avoid copying unnecessary files into the image.
+# This can be done by adding the target folder into .dockerignore file but Docker engine will ignore the folder even during the build process.
+	cargo clean
+	docker buildx build -f bot.Dockerfile -t ircc-ai-bot .
+
+local-image: local-image-embed local-image-oracle local-image-bot
 
 start-embed:
 	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml --profile manual up embed --build
 
 start-oracle:
 	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml up oracle --build
+
+start-bot:
+	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml up bot --build
