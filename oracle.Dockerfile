@@ -21,7 +21,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # Build the oracle binary
 WORKDIR /ircc-ai-build
 COPY . .
-RUN cargo build --release --bin oracle
+RUN cargo build --release --bin oracle --features oracle
 
 # Runtime Stage
 # Prepare the runtime image
