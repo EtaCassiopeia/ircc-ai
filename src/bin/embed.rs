@@ -16,6 +16,7 @@ struct Args {
 	path: String
 }
 
+#[cfg(feature = "embed")]
 #[tokio::main]
 async fn main() -> Result<()> {
 	dotenv::dotenv().ok();
