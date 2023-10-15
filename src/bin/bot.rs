@@ -1,10 +1,24 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
+use ctrlc::set_handler;
 use eventsource_client as es;
 use futures::TryStreamExt;
 use ircc_ai::constants::ORACLE_QUERY_URL_DEFAULT;
+use serde::Serialize;
 use teloxide::prelude::*;
 use tokio::sync::mpsc;
+
+extern crate pretty_env_logger;
+#[macro_use]
+extern crate log;
+
+
+#[derive(Serialize)]
+pub struct Query {
+	pub query: String
+}
 
 enum EventMessage {
 	Start,
@@ -16,22 +30,57 @@ enum EventMessage {
 #[cfg(feature = "bot")]
 #[tokio::main]
 async fn main() {
-	use ircc_ai::convrsation::Query;
-
 	pretty_env_logger::init();
-	log::info!("Starting IRCC bot...");
+	info!("Starting IRCC bot...");
+
+	// Initialize Ctrl+C signal handling.
+	let running = Arc::new(AtomicBool::new(true));
+	let r = running.clone();
+
+	set_handler(move || {
+		r.store(false, Ordering::SeqCst);
+	})
+	.expect("Error setting Ctrl+C handler");
+
+	// Spawn the REPL in a separate thread.
+	let (tx, mut rx) = mpsc::channel(32);
+
+	let repl_handle = tokio::spawn(async move {
+		run().await;
+		tx.send(()).await.expect("Error sending signal to main thread");
+	});
+
+	// Wait for Ctrl+C or the REPL to finish.
+	tokio::select! {
+		_ = rx.recv() => {
+			// REPL finished
+			info!("REPL finished, terminating...");
+		}
+		_ = tokio::signal::ctrl_c() => {
+			// Ctrl+C signal received, terminate the REPL gracefully.
+			info!("Ctrl+C received, terminating REPL...");
+			running.store(false, Ordering::SeqCst);
+		}
+	}
+
+	// Wait for the REPL thread to finish.
+	repl_handle.await.expect("Error waiting for REPL thread");
+}
+
+async fn run() {
 
 	let bot = Bot::from_env();
+	debug!("Bot started...");
 
 	teloxide::repl(bot, |bot: Bot, msg: Message| async move {
-		log::info!("Received {:?} from @{:?}", msg.text(), msg.from());
+		debug!("Received {:?} from @{:?}", msg.text(), msg.from());
 
 		if let Some(q) = msg.text() {
 			if q != "/start" {
 				let json_query = Query { query: q.to_string() };
 				let json_string = serde_json::to_string(&json_query).unwrap();
-				// TODO: handle errors
-				process_query(bot, msg.chat.id, &json_string).await;
+
+				process_query(bot, msg.chat.id, &json_string).await.log_on_error().await;
 			}
 		};
 		Ok(())
