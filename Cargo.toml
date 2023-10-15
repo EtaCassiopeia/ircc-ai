@@ -8,28 +8,34 @@ repository = "https://github.com/EtaCassiopeia/ircc-ai"
 authors = ["Mohsen Zainalpour <zainalpour@yahoo.com>"]
 license = "MIT"
 
-default-run = "oracle"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["oracle"]
-oracle = ["actix-web","actix-web-lab","actix-rt","tracing-actix-web","actix-cors","openai-api-rs"]
+default = []
+oracle = ["actix-web","actix-web-lab","actix-rt","tracing-actix-web","actix-cors","openai-api-rs", "ort", "ndarray"]
 bot = ["teloxide", "pretty_env_logger", "eventsource-client"]
+embed = ["ndarray", "ort"]
 
+
+# Note: This was an attempt utilizie the caching mechanism of Docker build to prevent recompilation of the dependencies.
+# Use workspace-level Cargo.toml instead.
 [[bin]]
 name = "embed"
 path = "src/bin/embed.rs"
+features = ["embed"]
+optional = true
 
 [[bin]]
 name = "oracle"
 path = "src/bin/oracle.rs"
 features = ["oracle"]
+optional = true
 
 [[bin]]
 name = "bot"
 path = "src/bin/bot.rs"
 features = ["bot"]
+optional = true
 
 
 [dependencies]
@@ -38,10 +44,11 @@ async-recursion = "1"
 clap = { version = "4.4", features = ["derive"] }
 dotenv = "0.15"
 env_logger = "0.10"
-log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
-ndarray = "0.15"
-ort = {version = "1", features = ["load-dynamic"]}
-tokio = {version = "1",  features = ["full"] }
+log = "0.4"
+
+ndarray = {version = "0.15" , optional = true}
+ort = {version = "1", features = ["load-dynamic"], optional = true}
+tokio = { version = "1", features = ["full"] }
 tokenizers = "0.14"
 futures = "0.3.28"
 async-trait = "0.1"
@@ -58,8 +65,7 @@ actix-rt = {version="2",optional = true }
 tracing-actix-web = {version="0.7",optional = true }
 actix-cors = {version="0.6.4",optional = true }
 
-
 teloxide = { version = "0.12", features = ["macros"] ,optional = true}
 pretty_env_logger = {version = "0.5", optional = true}
-
 eventsource-client =  {version = "0.11", optional = true}
+ctrlc = "3.4.1"
