@@ -25,6 +25,7 @@ pub struct QdrantDB {
 impl RepositoryEmbeddingsDB for QdrantDB {
 	async fn insert_embeddings(&self, embeddings: Vec<FileEmbeddings>) -> Result<()> {
 		if self.client.has_collection(QDRANT_COLLECTION_NAME).await? {
+			log::info!("Deleting collection {}", QDRANT_COLLECTION_NAME);
 			self.client.delete_collection(QDRANT_COLLECTION_NAME).await?;
 		}
 
@@ -41,6 +42,7 @@ impl RepositoryEmbeddingsDB for QdrantDB {
 		};
 
 		self.client.create_collection(&collection_details).await?;
+		log::info!("Created collection {}", QDRANT_COLLECTION_NAME);
 
 		let points: Vec<PointStruct> = embeddings
 			.into_par_iter()
@@ -53,12 +55,16 @@ impl RepositoryEmbeddingsDB for QdrantDB {
 			})
 			.collect();
 
+		let points_len = points.len();
+
 		self.client.upsert_points(QDRANT_COLLECTION_NAME, points, None).await?;
+		log::info!("Upserted {} points", points_len);
 
 		Ok(())
 	}
 
 	async fn get_relevant_files(&self, query_embeddings: Embeddings, limit: f32) -> Result<Vec<String>> {
+		log::info!("Searching for relevant files");
 		let search_response = self
 			.client
 			.search_points(&SearchPoints {

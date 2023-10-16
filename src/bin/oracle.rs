@@ -2,23 +2,21 @@ use std::{path::Path, sync::Arc};
 
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
-use env_logger::Env;
 use ircc_ai::{
 	constants::{HOME_ROUTE_REDIRECT_URL, WEBSERVER_PORT_DEFAULT},
 	db::qdrant::QdrantDB,
 	embeddings::Onnx
 };
+use log::info;
 use tracing_actix_web::TracingLogger;
 
 #[cfg(feature = "oracle")]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-	use log::info;
+	pretty_env_logger::init();
 
 	dotenv::dotenv().ok();
 	let host = "0.0.0.0";
-
-	env_logger::init_from_env(Env::default().default_filter_or("info"));
 
 	let model: Arc<Onnx> = Arc::new(Onnx::new(Path::new("/model")).unwrap());
 	let db: Arc<QdrantDB> = Arc::new(QdrantDB::initialize().unwrap());
