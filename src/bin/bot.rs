@@ -14,7 +14,6 @@ extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
 
-
 #[derive(Serialize)]
 pub struct Query {
 	pub query: String
@@ -68,7 +67,6 @@ async fn main() {
 }
 
 async fn run() {
-
 	let bot = Bot::from_env();
 	debug!("Bot started...");
 
