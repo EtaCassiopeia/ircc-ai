@@ -18,25 +18,25 @@ RUN apt-get install -y \
 # Clean up apt artifacts
 RUN rm -rf /var/lib/apt/lists/*
 
-# Build the embed binary
+# Build the oracle binary
 WORKDIR /ircc-ai-build
 COPY . .
-RUN cargo build --release --bin embed --no-default-features --features embed
+RUN cargo build --target=x86_64-unknown-linux-gnu --release --bin oracle --features oracle
 
 # Runtime Stage
 # Prepare the runtime image
 FROM debian:bullseye-slim
 
 # Copy the built binary and required files
-COPY --from=builder /ircc-ai-build/target/release/embed /usr/local/bin/embed
-COPY --from=builder /ircc-ai-build/target/release/libonnxruntime.so /usr/local/lib/libonnxruntime.so
+COPY --from=builder /ircc-ai-build/target/x86_64-unknown-linux-gnu/release/oracle /usr/local/bin/oracle
+COPY --from=builder /ircc-ai-build/target/x86_64-unknown-linux-gnu/release/libonnxruntime.so /usr/local/lib/libonnxruntime.so
 COPY model /model
 
 # Set the library path for libonnxruntime.so
 ENV ORT_DYLIB_PATH=/usr/local/lib/libonnxruntime.so
 
-# Set the entrypoint to your embed binary
-ENTRYPOINT ["/usr/local/bin/embed"]
+# Set the entrypoint to your oracle binary
+ENTRYPOINT ["/usr/local/bin/oracle"]
 
 # Provide a default value for the --path argument
 CMD ["--path", "/content"]

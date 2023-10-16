@@ -30,7 +30,7 @@ FROM base as builder
 # Copying actual source code will overwrite the dummy lib.rs and restore the original Cargo.toml
 COPY . /app/
 
-RUN cargo build --release  --bin bot --no-default-features --features bot
+RUN cargo build --target=x86_64-unknown-linux-gnu --release  --bin bot --no-default-features --features bot
 
 # Runtime Stage: Creating a minimal image
 FROM --platform=$TARGETPLATFORM debian:bullseye-slim
@@ -44,7 +44,7 @@ RUN apt-get update && \
 
 RUN apt-get update && apt-get install -y libssl1.1
 
-COPY --from=builder /app/target/release/bot /usr/local/bin/bot
+COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/bot /usr/local/bin/bot
 
 # Setting the entrypoint to your binary
 CMD ["/usr/local/bin/bot"]

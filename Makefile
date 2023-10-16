@@ -17,25 +17,25 @@ build:
 
 local-image-embed:
 	cargo clean
-	docker buildx build -f embed.Dockerfile --load -t ircc-ai-embed .
+	docker buildx build --platform linux/amd64 -f Dockerfile.embed.x86_64 --load -t ircc-ai-embed .
 
 local-image-oracle:
 	cargo clean
-	docker buildx build -f oracle.Dockerfile --load -t ircc-ai-oracle .
+	docker buildx build --platform linux/amd64 -f Dockerfile.oracle.x86_64 --load -t ircc-ai-oracle .
 
 local-image-bot:
 # Clean up the build catch to avoid copying unnecessary files into the image.
 # This can be done by adding the target folder into .dockerignore file but Docker engine will ignore the folder even during the build process.
 	cargo clean
-	docker buildx build -f bot.Dockerfile -t ircc-ai-bot .
+	docker buildx build --platform linux/amd64 -f Dockerfile.bot.x86_64 -t ircc-ai-bot .
 
 local-image: local-image-embed local-image-oracle local-image-bot
 
 start-embed:
-	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml --profile manual up embed --build
+	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml --profile manual-embed up embed --build
 
 start-oracle:
 	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml up oracle --build
 
 start-bot:
-	CONTENT_PATH_HOST=$(CONTENT_PATH_HOST) docker-compose -f docker-compose.yml up bot --build
+	docker-compose -f docker-compose.yml --profile manual-bot up bot --build

@@ -9,6 +9,7 @@ services:
 
   oracle:
     image: ircc-ai-oracle:latest
+    platform: linux/amd64
     command: ["--path", "/content"]
     environment:
       # Consume env variables from a .env file found in the same directory
@@ -27,9 +28,10 @@ services:
 
   embed:
     image: ircc-ai-embed:latest
-    # `embed` will not start automatically. To start `embed`, you would run `docker-compose --profile manual up embed`
+    platform: linux/amd64
+    # `embed` will not start automatically. To start `embed`, you would run `docker-compose --profile manual-embed up embed`
     profiles:
-      - manual
+      - manual-embed
     command: ["--path", "/content"]
     environment:
       # Consume env variables from a .env file found in the same directory
@@ -43,10 +45,14 @@ services:
 
   bot:
     image: ircc-ai-bot:latest
+    platform: linux/amd64
+    # `bot` will not start automatically. To start `bot`, you would run `docker-compose --profile manual-bot up bot`
+    profiles:
+      - manual-bot
     environment:
       # Consume env variables from a .env file found in the same directory
       # as this docker-compose file.
-      RUST_LOG: "info"
+      RUST_LOG: "debug"
       ORACLE_QUERY_URL: "http://oracle:3000/query"
       TELOXIDE_TOKEN: ${TELOXIDE_TOKEN}
     depends_on:
