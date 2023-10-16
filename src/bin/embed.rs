@@ -1,13 +1,13 @@
 use std::path::{Path, PathBuf};
+use std::process::exit;
 use std::sync::Arc;
 
-use anyhow::Result;
 use clap::Parser;
-use env_logger::Env;
 use ircc_ai::db::qdrant::QdrantDB;
 use ircc_ai::db::RepositoryEmbeddingsDB;
 use ircc_ai::embeddings::*;
 use ircc_ai::fs::embed_path;
+use ircc_ai::prelude::*;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -18,10 +18,10 @@ struct Args {
 
 #[cfg(feature = "embed")]
 #[tokio::main]
-async fn main() -> Result<()> {
-	dotenv::dotenv().ok();
+async fn main() {
+	pretty_env_logger::init();
 
-	env_logger::init_from_env(Env::default().default_filter_or("info"));
+	dotenv::dotenv().ok();
 
 	// The model is copied in the container at build time
 	let model: Arc<Onnx> = Arc::new(Onnx::new(Path::new("/model")).unwrap());
@@ -31,9 +31,23 @@ async fn main() -> Result<()> {
 
 	let dir = PathBuf::from(args.path);
 
-	let file_embeddings = embed_path(model, dir).await?;
+	log::info!("Calculating embeddings for {}", dir.display());
 
-	db.insert_embeddings(file_embeddings).await?;
+	let result = embed_and_insert_embeddings(&model, &db, &dir).await;
 
-	Ok(())
+	match result {
+		Ok(_) => {
+			log::info!("Process completed successfully.");
+			exit(0);
+		}
+		Err(err) => {
+			log::error!("Process failed: {}", err);
+			exit(1);
+		}
+	}
+}
+
+async fn embed_and_insert_embeddings(model: &Arc<Onnx>, db: &QdrantDB, dir: &Path) -> Result<()> {
+	let file_embeddings = embed_path(Arc::clone(model), dir.to_path_buf()).await?;
+	db.insert_embeddings(file_embeddings).await
 }
