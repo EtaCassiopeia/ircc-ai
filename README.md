@@ -56,7 +56,7 @@ Using `Scrapy`` for web scraping involves several steps. Here's a simplified gui
    - A spider is a script that tells Scrapy what URLs to scrape and how to extract data from the pages.
    - Inside your project directory, create a spider using the following command, replacing `myspider` and `example.com` with your desired spider name and target URL:
      ```bash
-     scrapy genspider ircc canada.ca
+     $ scrapy genspider ircc canada.ca
      ```
 
 ### 4. **Define the Spider**:
@@ -68,8 +68,13 @@ Using `Scrapy`` for web scraping involves several steps. Here's a simplified gui
    - In the terminal, navigate to your project directory.
    - Run the spider using the following command, replacing `myspider` with the name of your spider:
      ```bash
-     scrapy crawl canada_ca_txt
+     $ scrapy crawl canada_ca_md
      ```
+Note: The script folder contains a script to convert the links to markdown inline links. Script can be run as follows:
+
+```bash
+$ ./replace_links.sh /Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/output-md
+```
 
 ## Running Locally
 
@@ -98,14 +103,14 @@ $ make local-image
 To create the embeddings, run the following command.  It will traverse the directory specified by `CONTENT_PATH_HOST`, creating embeddings for each file. These embeddings will then be stored in `QdrantDB`.
 
 ```bash
-$ make start-embed CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt
+$ make start-embed CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/output-md
 ```
 
 ### Start the Engine
 To start the engine, run the following command.  It will start the engine and expose it on port `3000`.
 
 ```bash
-$ make start-oracle CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/outputtxt
+$ make start-oracle CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/output-md
 ``````
 
 
@@ -140,9 +145,17 @@ The request is processed by the server and responses are sent as [Server-sent ev
 #### Example
 
 ```bash
-curl --location 'localhost:3000/query' \
+$ curl --location 'localhost:3000/query' \
 --header 'Content-Type: application/json' \
 --data '{
     "query": "How long must I stay in Canada to keep my permanent resident status?"
 }'
+```
+
+### Start Telegram Bot
+
+To start the telegram bot, run the following command.  It will start the telegram bot and start listening for messages.
+
+```bash
+$ make start-bot
 ```
