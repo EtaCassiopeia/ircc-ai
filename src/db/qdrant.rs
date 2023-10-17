@@ -10,6 +10,7 @@ use rayon::prelude::*;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 
 use super::RepositoryEmbeddingsDB;
+use crate::utils::hash::calculate_hash;
 use crate::{
 	constants::{EMBEDDINGS_DIMENSION, MAX_FILES_COUNT, QDRANT_COLLECTION_NAME, QDRANT_URL_DEFAULT},
 	embeddings::Embeddings,
@@ -23,35 +24,44 @@ pub struct QdrantDB {
 
 #[async_trait]
 impl RepositoryEmbeddingsDB for QdrantDB {
-	async fn insert_embeddings(&self, embeddings: Vec<FileEmbeddings>) -> Result<()> {
+	async fn delete_collection(&self) -> Result<()> {
 		if self.client.has_collection(QDRANT_COLLECTION_NAME).await? {
 			log::info!("Deleting collection {}", QDRANT_COLLECTION_NAME);
 			self.client.delete_collection(QDRANT_COLLECTION_NAME).await?;
 		}
 
-		let collection_details = CreateCollection {
-			collection_name: QDRANT_COLLECTION_NAME.to_string(),
-			vectors_config: Some(VectorsConfig {
-				config: Some(Config::Params(VectorParams {
-					size: EMBEDDINGS_DIMENSION as u64,
-					distance: Distance::Cosine.into(),
-					..Default::default()
-				}))
-			}),
-			..Default::default()
-		};
+		Ok(())
+	}
 
-		self.client.create_collection(&collection_details).await?;
-		log::info!("Created collection {}", QDRANT_COLLECTION_NAME);
+	async fn insert_embeddings(&self, embeddings: Vec<FileEmbeddings>) -> Result<()> {
+		let collection_exists = self.client.has_collection(QDRANT_COLLECTION_NAME).await?;
+
+		if !collection_exists {
+			let collection_details = CreateCollection {
+				collection_name: QDRANT_COLLECTION_NAME.to_string(),
+				vectors_config: Some(VectorsConfig {
+					config: Some(Config::Params(VectorParams {
+						size: EMBEDDINGS_DIMENSION as u64,
+						distance: Distance::Cosine.into(),
+						..Default::default()
+					}))
+				}),
+				..Default::default()
+			};
+
+			self.client.create_collection(&collection_details).await?;
+			log::info!("Created collection {}", QDRANT_COLLECTION_NAME);
+		}
 
 		let points: Vec<PointStruct> = embeddings
 			.into_par_iter()
-			.enumerate()
 			.map(|file| {
-				let FileEmbeddings { path, embeddings } = file.1;
+				let FileEmbeddings { path, embeddings } = file;
+				let path_hash = calculate_hash(&path);
+
 				let payload: Payload = HashMap::from([("path", path.into())]).into();
 
-				PointStruct::new(file.0 as u64, embeddings, payload)
+				PointStruct::new(path_hash, embeddings, payload)
 			})
 			.collect();
 

@@ -3,7 +3,8 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use async_recursion::async_recursion;
-use futures::stream::StreamExt;
+use futures::stream::BoxStream;
+use futures::stream::{self, StreamExt};
 use log::{debug, info};
 use tokio::fs;
 use tokio::time::Duration;
@@ -41,32 +42,31 @@ async fn list_files_recursively(dir: PathBuf) -> Result<Vec<PathBuf>> {
 	Ok(files)
 }
 
-pub async fn embed_path<M: EmbeddingsModel + Send + Sync + 'static>(model: Arc<M>, path: PathBuf) -> Result<Vec<FileEmbeddings>> {
-	let files = list_files_recursively(path).await?;
+pub async fn embed_path<M: EmbeddingsModel + Send + Sync + 'static>(model: Arc<M>, path: PathBuf) -> BoxStream<'static, Result<FileEmbeddings>> {
+	let files = match list_files_recursively(path).await {
+		Ok(f) => f,
+		Err(e) => return stream::once(futures::future::ready(Err(e))).boxed()
+	};
 
-	let file_embeddings_stream = futures::stream::iter(files.into_iter()).then(|path| {
-		let model_clone = Arc::clone(&model);
-		async move {
-			let file_content = fetch_file_content(path.clone()).await?;
-			let embeddings = model_clone.embed(&file_content)?;
-			log::info!("Embeddings for {} calculated", path.display());
-			Ok(FileEmbeddings {
-				path: path.to_str().unwrap().to_string(),
-				embeddings
-			})
-		}
-	});
+	let file_embeddings_stream = stream::iter(files.into_iter())
+		.then(move |path| {
+			let model_clone: Arc<M> = Arc::clone(&model);
+			async move {
+				let file_content = fetch_file_content(path.clone()).await?;
+				let embeddings = model_clone.embed(&file_content)?;
+				log::info!("Embeddings for {} calculated", path.display());
+				Ok(FileEmbeddings {
+					path: path.to_str().unwrap().to_string(),
+					embeddings
+				})
+			}
+		})
+		.boxed();
 
-	let file_embeddings_results: Vec<Result<FileEmbeddings>> = file_embeddings_stream.collect().await;
-
-	let file_embeddings: Result<Vec<FileEmbeddings>> = file_embeddings_results.into_iter().collect();
-
-	log::info!("Calculated embeddings for {} files", file_embeddings.as_ref().map(Vec::len).unwrap_or(0));
-
-	file_embeddings
+	file_embeddings_stream
 }
 
-async fn fetch_file_content(path: PathBuf) -> Result<String> {
+pub async fn fetch_file_content(path: PathBuf) -> Result<String> {
 	let timeout = Duration::from_secs(60); // Adjust the timeout as needed.
 	let result = tokio::time::timeout(timeout, async {
 		let file_content = fs::read_to_string(path).await?;
@@ -76,7 +76,7 @@ async fn fetch_file_content(path: PathBuf) -> Result<String> {
 
 	match result {
 		Ok(Ok(content)) => Ok(content),
-		Ok(Err(err)) => Err(err.into()),
+		Ok(Err(err)) => Err(err),
 		Err(_) => Err(Error::msg("File content fetching timed out."))
 	}
 }

@@ -52,7 +52,7 @@ pub async fn search_file<M: EmbeddingsModel>(path: &str, query: &str, model: &M,
 		format!("{}{}", base_path, path)
 	};
 
-	let file_content = fetch_file_content(&full_path).await.unwrap_or_default();
+	let file_content = fetch_file_content((&full_path).into()).await.unwrap_or_default();
 
 	let splitter = text_splitter::TextSplitter::default().with_trim_chunks(true);
 
