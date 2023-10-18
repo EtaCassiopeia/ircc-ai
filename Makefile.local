@@ -1,13 +1,13 @@
 .PHONY: local-image-embed start-embed local-image-oracle start-oracle local-image-bot start-bot local-image
 
 local-image-embed:
-	docker buildx build -f docker/Dockerfile.embed --load -t ircc-ai-embed .
+	docker buildx build -f docker/Dockerfile.embed.dev --load -t ircc-ai-embed .
 
 local-image-oracle:
-	docker buildx build -f docker/Dockerfile.oracle --load -t ircc-ai-oracle .
+	docker buildx build -f docker/Dockerfile.oracle.dev --load -t ircc-ai-oracle .
 
 local-image-bot:
-	docker buildx build -f docker/Dockerfile.bot -t ircc-ai-bot .
+	docker buildx build -f docker/Dockerfile.bot.dev -t ircc-ai-bot .
 
 local-image: local-image-embed local-image-oracle local-image-bot
 
