@@ -9,7 +9,6 @@ services:
 
   oracle:
     image: ircc-ai-oracle:latest
-    platform: linux/amd64
     command: ["--path", "/content"]
     environment:
       # Consume env variables from a .env file found in the same directory
@@ -18,37 +17,26 @@ services:
       WEBSERVER_PORT: 3000
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       RUST_LOG: "info"
-      DOCUMENTS_BASE_PATH: "/content"
     ports:
       - "3000:3000"
-    volumes:
-      - ${CONTENT_PATH_HOST:-./content}:/content
     depends_on:
       - qdrant
 
   embed:
     image: ircc-ai-embed:latest
-    platform: linux/amd64
     # `embed` will not start automatically. To start `embed`, you would run `docker-compose --profile manual-embed up embed`
     profiles:
-      - manual-embed
-    command: ["--path", "/content"]
+      - manual
     environment:
       # Consume env variables from a .env file found in the same directory
       # as this docker-compose file.
       QDRANT_URL: "http://qdrant:6334"
       RUST_LOG: "info"
-    volumes:
-      - ${CONTENT_PATH_HOST:-./content}:/content
     depends_on:
       - qdrant
 
   bot:
     image: ircc-ai-bot:latest
-    platform: linux/amd64
-    # `bot` will not start automatically. To start `bot`, you would run `docker-compose --profile manual-bot up bot`
-    profiles:
-      - manual-bot
     environment:
       # Consume env variables from a .env file found in the same directory
       # as this docker-compose file.

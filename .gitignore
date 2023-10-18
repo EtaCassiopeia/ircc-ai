@@ -3,3 +3,5 @@ Cargo.lock
 issue-tracker.md
 
 .env
+
+/content

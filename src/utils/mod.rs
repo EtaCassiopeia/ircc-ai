@@ -1,5 +1,5 @@
 #[cfg(feature = "oracle")]
 pub mod functions;
-#[cfg(feature = "embed")]
+#[cfg(any(feature = "oracle", feature = "embed"))]
 pub mod hash;
 pub mod macros;

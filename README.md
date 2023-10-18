@@ -89,13 +89,16 @@ Once, the above requirements are satisfied, you can run the project like so:
 
 ### Docker container
 
-The `ircc-ai` engine and embed can also be run locally via a docker container and
+The `ircc-ai` engine (oracle), embed and bot can also be run locally via a docker container and
 includes all the necessary dependencies.
+
+Note: Please ensure the scrape data is available in the `content` directory. The `content` directory should contain the `output-md/en` directory from the `scrapy` project.
+The data can also be passed in via the `CONTENT_PATH_HOST` environment variable but for sake of simplicity, we will assume the data is available in the `content` directory.
 
 To build the docker images run:
 
 ```bash
-$ make local-image
+$ make -f Makefile.local local-image
 ```
 
 ### Create Embeddings
@@ -103,14 +106,14 @@ $ make local-image
 To create the embeddings, run the following command.  It will traverse the directory specified by `CONTENT_PATH_HOST`, creating embeddings for each file. These embeddings will then be stored in `QdrantDB`.
 
 ```bash
-$ make start-embed CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/output-md
+$ make -f Makefile.local start-embed
 ```
 
 ### Start the Engine
 To start the engine, run the following command.  It will start the engine and expose it on port `3000`.
 
 ```bash
-$ make start-oracle CONTENT_PATH_HOST=/Users/mohsen/code/Personal/ircc-dump-scrapy/canadascraper/output-md
+$ make -f Makefile.local start-oracle
 ``````
 
 
@@ -157,5 +160,5 @@ $ curl --location 'localhost:3000/query' \
 To start the telegram bot, run the following command.  It will start the telegram bot and start listening for messages.
 
 ```bash
-$ make start-bot
+$ -f Makefile.local make start-bot
 ```

@@ -20,25 +20,20 @@ bot = ["teloxide", "eventsource-client"]
 embed = ["ndarray", "ort"]
 
 
-# Note: This was an attempt utilizie the caching mechanism of Docker build to prevent recompilation of the dependencies.
-# Use workspace-level Cargo.toml instead.
 [[bin]]
 name = "embed"
 path = "src/bin/embed.rs"
 features = ["embed"]
-optional = true
 
 [[bin]]
 name = "oracle"
 path = "src/bin/oracle.rs"
 features = ["oracle"]
-optional = true
 
 [[bin]]
 name = "bot"
 path = "src/bin/bot.rs"
 features = ["bot"]
-optional = true
 
 
 [dependencies]
@@ -57,7 +52,7 @@ futures = "0.3.28"
 async-trait = "0.1"
 qdrant-client = "1"
 rayon = "1"
-openai-api-rs = {version="1.0", optional = true }
+openai-api-rs = {version="2.0.0", optional = true }
 serde = "1"
 serde_json = "1"
 text-splitter = "0.4"

@@ -7,7 +7,7 @@ use qdrant_client::{
 	qdrant::{vectors_config::Config, ScrollPoints, VectorParams, VectorsConfig}
 };
 use rayon::prelude::*;
-use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use super::RepositoryEmbeddingsDB;
 use crate::utils::hash::calculate_hash;
