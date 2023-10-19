@@ -24,8 +24,5 @@ pub const RELEVANT_CHUNKS_LIMIT: usize = 2;
 // OpenAI
 pub const CHAT_COMPLETION_TEMPERATURE: f64 = 0.7;
 
-// pub const CHAT_COMPLETION_MODEL: &str = "gpt-3.5-turbo";
-
-// Same capabilities as the standard gpt-4 mode but with 4x the context length. Will be updated with our latest model iteration.
-// See https://platform.openai.com/docs/models/gpt-4 for more info
-pub const CHAT_COMPLETION_MODEL: &str = "gpt-4-32k";
+// See https://platform.openai.com/docs/models/gpt-4 for more info (tested with gpt-3.5-turbo and gpt-4)
+pub const CHAT_COMPLETION_MODEL: &str = "gpt-4";
