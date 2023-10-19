@@ -48,7 +48,7 @@ pub async fn search_file<M: EmbeddingsModel>(path: &str, query: &str, model: &M,
 	let full_path = if path.starts_with(&base_path) {
 		path.to_string()
 	} else {
-		dbg!("Accessing inline document link: {}", path);
+		log::debug!("Accessing inline document link: {}", path);
 		format!("{}{}", base_path, path)
 	};
 
