@@ -23,13 +23,13 @@ cluster:
 deploy:
 	. ./k8s/.env
 	@echo "Deploying to $(CLUSTER_NAME)@$(PROJECT_ID)..."
-	kubectl apply -f k8s/qdrant/deployment.yaml
-	kubectl apply -f k8s/qdrant/service.yaml
-	@read -p "qdrant has been deployed successfully. Press enter to continue..."
-	env $$(cat ./k8s/.env | xargs) envsubst < k8s/embed/job.yaml | kubectl apply -f -
-	@read -p "embed has been deployed successfully. Press enter to continue..."
+	# kubectl apply -f k8s/qdrant/deployment.yaml
+	# kubectl apply -f k8s/qdrant/service.yaml
+	# @read -p "qdrant has been deployed successfully. Press enter to continue..."
+	# env $$(cat ./k8s/.env | xargs) envsubst < k8s/embed/job.yaml | kubectl apply -f -
+	# @read -p "embed has been deployed successfully. Press enter to continue..."
 	env $$(cat ./k8s/.env | xargs) envsubst < k8s/oracle/deployment.yaml | kubectl apply -f -
 	@read -p "oracle has been deployed successfully. Press enter to continue..."
 	env $$(cat ./k8s/.env | xargs) envsubst < k8s/oracle/service.yaml | kubectl apply -f -
-	env $$(cat ./k8s/.env | xargs) envsubst < k8s/bot/deployment.yaml | kubectl apply -f -
+	# env $$(cat ./k8s/.env | xargs) envsubst < k8s/bot/deployment.yaml | kubectl apply -f -
 	@echo "All services have been deployed successfully."
