@@ -6,7 +6,7 @@ Make sure you have the following installed:
 - gcloud
 - kubectl
 
-Please refer to the [Installation](#installation-instructions) section for instructions.
+Please refer to the [Installation](#set-up-gcp) section for instructions.
 
 Make sure the cluster is up and running. Refer to the [Cluster](#cluster) section for instructions.
 
@@ -28,6 +28,7 @@ Use the following template for the `k8s/.env.secret` file:
 
 ```toml
 TELOXIDE_TOKEN=YOUR_TELOXIDE_TOKEN
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
 
 ### Build and Push Docker Images
@@ -54,7 +55,9 @@ Deploy the bot, oracle, and qdrant to the cluster:
 make deploy
 ```
 
-## Set up GCP {#installation-instructions}
+-----------------
+
+## Set up GCP
 
 Here's a step-by-step guide on how to use `gcloud`, the command-line tool for Google Cloud Platform (GCP):
 
