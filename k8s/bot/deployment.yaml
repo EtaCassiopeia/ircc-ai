@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bot
+  template:
+    metadata:
+      labels:
+        app: bot
+    spec:
+      containers:
+      - name: bot
+        image: gcr.io/$PROJECT_ID/bot:latest
+        env:
+        - name: TELOXIDE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ircc-secrets
+              key: TELOXIDE_TOKEN
+        - name: ORACLE_QUERY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ircc-config
+              key: ORACLE_QUERY_URL
+        - name: RUST_LOG
+          valueFrom:
+            configMapKeyRef:
+              name: ircc-config
+              key: RUST_LOG

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: embed
+spec:
+  template:
+    metadata:
+      labels:
+        app: embed
+    spec:
+      containers:
+      - name: embed
+        image: gcr.io/$PROJECT_ID/embed:latest
+        env:
+          - name: QDRANT_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ircc-config
+                key: QDRANT_URL
+          - name: RUST_LOG
+            valueFrom:
+              configMapKeyRef:
+                name: ircc-config
+                key: RUST_LOG
+      restartPolicy: Never

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle
+  template:
+    metadata:
+      labels:
+        app: oracle
+    spec:
+      containers:
+      - name: oracle
+        image: gcr.io/$PROJECT_ID/oracle:latest
+        env:
+          - name: QDRANT_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ircc-config
+                key: QDRANT_URL
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ircc-secrets
+                key: OPENAI_API_KEY
+          - name: RUST_LOG
+            valueFrom:
+              configMapKeyRef:
+                name: ircc-config
+                key: RUST_LOG
+        ports:
+        - containerPort: 3000
