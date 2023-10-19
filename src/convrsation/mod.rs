@@ -32,7 +32,7 @@ pub struct Conversation<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> {
 
 impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 	pub async fn initiate(mut query: data::Query, db: Arc<D>, model: Arc<M>, sender: Sender) -> Result<Self> {
-		log::debug!("Initiating conversation with query: {}", &query.query);
+		log::info!("Initiating conversation with query: {}", &query.query);
 		emit(&sender, QueryEvent::ProcessQuery(None)).await;
 
 		query.query = sanitize_query(&query.query)?;
@@ -162,7 +162,7 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 												return Err(e);
 											}
 										};
-										log::debug!("Response: {:?}", &response);
+										log::info!("Response: {:?}", &response);
 										let response = response.choices[0].message.content.clone().unwrap_or_default();
 
 										emit(&self.sender, QueryEvent::Done(Some(response.into()))).await;
@@ -185,7 +185,7 @@ impl<D: RepositoryEmbeddingsDB, M: EmbeddingsModel> Conversation<D, M> {
 							// preview, you can take full advantage of this powerful feature."
 
 							let response = response.choices[0].message.content.clone().unwrap_or_default();
-							log::debug!("Response: {}", &response);
+							log::info!("Response: {}", &response);
 							emit(&self.sender, QueryEvent::Done(Some(response.into()))).await;
 
 							return Ok(());
