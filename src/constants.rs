@@ -25,4 +25,4 @@ pub const RELEVANT_CHUNKS_LIMIT: usize = 2;
 pub const CHAT_COMPLETION_TEMPERATURE: f64 = 0.7;
 
 // See https://platform.openai.com/docs/models/gpt-4 for more info (tested with gpt-3.5-turbo and gpt-4)
-pub const CHAT_COMPLETION_MODEL: &str = "gpt-4";
+pub const CHAT_COMPLETION_MODEL: &str = "gpt-3.5-turbo";
