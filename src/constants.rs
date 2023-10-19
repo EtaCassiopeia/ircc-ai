@@ -1,10 +1,10 @@
 use std::ops::RangeInclusive;
 
 // Env var defaults
-pub const QDRANT_URL_DEFAULT: &str = "http://localhost:6334";
+pub const QDRANT_URL_DEFAULT: &str = "http://qdrant:6334";
 pub const WEBSERVER_PORT_DEFAULT: &str = "3000";
 
-pub const ORACLE_QUERY_URL_DEFAULT: &str = "http://localhost:3000/query";
+pub const ORACLE_QUERY_URL_DEFAULT: &str = "http://oracle:3000/query";
 
 // Embeddings
 pub const EMBEDDINGS_DIMENSION: usize = 384;
