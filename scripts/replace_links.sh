@@ -43,10 +43,10 @@ find "$dir" -type f -name "*.md" -exec sh -c "
     fi
 " \;
 
-# Now update the file extensions from .html or .htm to .md
+# Now update the file extensions from .html or .htm to .md, excluding full URLs starting with http://www.canada.ca or https://www.canada.ca
 find "$dir" -type f -name "*.md" -exec sh -c "
     if [ -r '{}' ] && [ -w '{}' ]; then
-        perl -i.bak -pe 's|\\]\\(([^)]*?)\\.html?\\)|](\\1.md)|g' '{}'
+        perl -i.bak -pe 's|\\]\\((?!https?://www\\.canada\\.ca)([^)]+?)\\.html?\\)|](\$1.md)|g' '{}'
     else
         echo 'Skipping inaccessible file: {}'
     fi
