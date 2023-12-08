@@ -160,5 +160,5 @@ $ curl --location 'localhost:3000/query' \
 To start the telegram bot, run the following command.  It will start the telegram bot and start listening for messages.
 
 ```bash
-$ -f Makefile.local make start-bot
+$ make -f Makefile.local make start-bot
 ```
